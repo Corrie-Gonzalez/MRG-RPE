@@ -575,11 +575,9 @@ function calculateSavings() {
   const currentUseAf = parseNumber(selectedPolygon.ConsumptiveUse_AF);
 
   const weightedReplacementEtMm = scenarios.reduce((sum, scenario) => {
-    return sum + scenario.meanEtMm * (scenario.percent / 100);
+    return sum + (scenario.meanEtMm * (scenario.percent / 100));
   }, 0);
 
-  // Convert ET depth in mm across polygon acres to acre-feet
-  // 304.8 mm = 1 foot
   const replacementUseAf = (weightedReplacementEtMm / 304.8) * areaAcres;
 
   const deltaEtMm = currentEtMm - weightedReplacementEtMm;
@@ -587,6 +585,10 @@ function calculateSavings() {
   const percentChange = currentUseAf !== 0 ? (deltaUseAf / currentUseAf) * 100 : 0;
 
   const isSavings = deltaUseAf >= 0;
+  const boxClass = isSavings ? "success-box" : "loss-box";
+  const symbol = isSavings ? "✓" : "⚠";
+  const direction = isSavings ? "reduction" : "increase";
+  const percentDirection = isSavings ? "decrease" : "increase";
 
   resultsBox.innerHTML = `
     <div class="result-row">
@@ -599,53 +601,25 @@ function calculateSavings() {
       <div class="result-value">${formatNumber(replacementUseAf, 2)} acre-feet</div>
     </div>
 
-    <div class="${isSavings ? "success-box" : "loss-box"}">
+    <div class="${boxClass}">
       <div>ΔET:</div>
       <div class="large-number">
-        ${isSavings ? "✓" : "⚠"} ${formatNumber(Math.abs(deltaEtMm), 1)} mm ${isSavings ? "reduction" : "increase"}
+        ${symbol} ${formatNumber(Math.abs(deltaEtMm), 1)} mm ${direction}
       </div>
 
       <br />
 
       <div>Δ Water Use:</div>
       <div class="large-number">
-        ${isSavings ? "✓" : "⚠"} ${formatNumber(Math.abs(deltaUseAf), 2)} acre-feet ${isSavings ? "reduction" : "increase"}
+        ${symbol} ${formatNumber(Math.abs(deltaUseAf), 2)} acre-feet ${direction}
       </div>
 
       <div style="margin-top: 8px;">
-        ${formatNumber(Math.abs(percentChange), 1)}% ${isSavings ? "decrease" : "increase"} in consumptive use
+        ${formatNumber(Math.abs(percentChange), 1)}% ${percentDirection} in consumptive use
       </div>
     </div>
   `;
 }
-    
-
-      // Convert ET depth in mm over acres to acre-feet.
-      // 1 acre-foot over 1 acre = 304.8 mm.
-      const replacementUseAf = (weightedReplacementEtMm / 304.8) * areaAcres;
-      const deltaEtMm = currentEtMm - weightedReplacementEtMm;
-      const deltaUseAf = currentUseAf - replacementUseAf;
-      const percentChange = currentUseAf !== 0 ? (deltaUseAf / currentUseAf) * 100 : 0;
-
-      resultsBox.innerHTML = `
-        <div class="result-row">
-          <div class="result-label">Weighted Mean Replacement ET</div>
-          <div class="result-value">${formatNumber(weightedReplacementEtMm, 1)} mm</div>
-        </div>
-        <div class="result-row">
-          <div class="result-label">Projected Replacement Water Use</div>
-          <div class="result-value">${formatNumber(replacementUseAf, 2)} acre-feet</div>
-        </div>
-        <div class="success-box">
-          <div>ΔET</div>
-          <div class="large-number">${formatNumber(deltaEtMm, 1)} mm</div>
-          <br />
-          <div>Δ Water Use</div>
-          <div class="large-number">${formatNumber(deltaUseAf, 2)} acre-feet</div>
-          <div style="margin-top: 8px;">${formatNumber(percentChange, 1)}% change in consumptive use</div>
-        </div>
-      `;
-    }
 
     function renderDefaultResults() {
       resultsBox.innerHTML = `
