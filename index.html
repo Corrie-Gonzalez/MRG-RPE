@@ -348,39 +348,39 @@
       });
     }
 
-    // async function initializeApp() {
-    //   try {
-    //     const [polygonRows, replacementRows] = await Promise.all([
-    //       loadCsv(POLYGON_CSV_URL),
-    //       loadCsv(REPLACEMENT_CSV_URL)
-    //     ]);
-
-    //     polygonData = polygonRows;
-    //     replacementCommunities = replacementRows
-    //       .filter(row => row["Vegetation Map Unit Name"])
-    //       .sort((a, b) => a["Vegetation Map Unit Name"].localeCompare(b["Vegetation Map Unit Name"]));
-
-    //     buildScenarioRows();
-    //   } catch (error) {
-    //     showWarning(polygonWarning, "CSV files could not be loaded. Check your CSV file paths or GitHub raw URLs.");
-    //     console.error(error);
-    //   }
-    // }
-
     async function initializeApp() {
-  try {
-    polygonData = await loadCsv(POLYGON_CSV_URL);
-    console.log("Polygon data loaded:", polygonData);
+      try {
+        const [polygonRows, replacementRows] = await Promise.all([
+          loadCsv(POLYGON_CSV_URL),
+          loadCsv(REPLACEMENT_CSV_URL)
+        ]);
 
-    // Temporarily skip replacement community CSV while testing Box 1
-    replacementCommunities = [];
-    buildScenarioRows();
+        polygonData = polygonRows;
+        replacementCommunities = replacementRows
+          .filter(row => row["Vegetation Map Unit Name"])
+          .sort((a, b) => a["Vegetation Map Unit Name"].localeCompare(b["Vegetation Map Unit Name"]));
 
-  } catch (error) {
-    showWarning(polygonWarning, "Polygon CSV could not be loaded. Check the file path.");
-    console.error(error);
-  }
-}
+        buildScenarioRows();
+      } catch (error) {
+        showWarning(polygonWarning, "CSV files could not be loaded. Check your CSV file paths or GitHub raw URLs.");
+        console.error(error);
+      }
+    }
+
+  // async function initializeApp() {
+  //   try {
+  //     polygonData = await loadCsv(POLYGON_CSV_URL);
+  //     console.log("Polygon data loaded:", polygonData);
+
+  //     // Temporarily skip replacement community CSV while testing Box 1
+  //     replacementCommunities = [];
+  //     buildScenarioRows();
+
+  //   } catch (error) {
+  //     showWarning(polygonWarning, "Polygon CSV could not be loaded. Check the file path.");
+  //     console.error(error);
+  //   }
+  // } 
 
     function buildScenarioRows() {
       scenarioRows.innerHTML = "";
