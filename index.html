@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ET Savings Calculator</title>
+
+  <!-- PapaParse reads CSV files directly from GitHub or local folders -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f1;
+      color: #243026;
+    }
+
+    .app {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.8rem;
+      color: #1f3d2f;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #59635c;
+      font-size: 0.98rem;
+    }
+
+    .calculator-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.45fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 2px solid #cfd8cf;
+      border-radius: 14px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      min-height: 500px;
+    }
+
+    .card-header {
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      border-bottom: 1px solid #d9dfd8;
+    }
+
+    .blue .card-header {
+      background: #dfeef6;
+      color: #1f3847;
+    }
+
+    .tan .card-header {
+      background: #eee9df;
+      color: #41382e;
+    }
+
+    .green .card-header {
+      background: #dcefd9;
+      color: #21452a;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #2f3830;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #bfc8c0;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #ffffff;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid #9ac2a0;
+      border-color: #759d7c;
+    }
+
+    button {
+      margin-top: 10px;
+      width: 100%;
+      padding: 11px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #2f6f45;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #255a38;
+    }
+
+    .field-group {
+      margin-bottom: 16px;
+    }
+
+    .info-row,
+    .result-row {
+      padding: 11px 0;
+      border-bottom: 1px solid #e5e8e3;
+    }
+
+    .info-row:last-child,
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label,
+    .result-label {
+      font-weight: 700;
+      color: #2c342d;
+      margin-bottom: 4px;
+    }
+
+    .info-value,
+    .result-value {
+      font-size: 1.05rem;
+      color: #1f2a21;
+    }
+
+    .scenario-row {
+      display: grid;
+      grid-template-columns: 1fr 110px;
+      gap: 12px;
+      align-items: end;
+      padding: 14px 0;
+      border-bottom: 1px solid #e5e8e3;
+    }
+
+    .scenario-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #667065;
+    }
+
+    .warning {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fff4d8;
+      color: #664d03;
+      display: none;
+    }
+
+    .success-box {
+      margin-top: 18px;
+      padding: 16px;
+      background: #dff1dc;
+      border-radius: 12px;
+      color: #214a2b;
+      font-weight: 700;
+    }
+
+    .large-number {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #244d2c;
+    }
+
+    .muted {
+      color: #68726a;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 0.88rem;
+      color: #667066;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 950px) {
+      .calculator-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header>
+      <h1>ET Savings Calculator</h1>
+      <p class="subtitle">Estimate changes in evapotranspiration and consumptive water use for selected riparian replacement scenarios.</p>
+    </header>
+
+    <section class="calculator-layout">
+      <!-- BOX 1: Selected polygon information -->
+      <div class="card blue">
+        <div class="card-header">Selected Polygon Information</div>
+        <div class="card-body">
+          <div class="field-group">
+            <label for="polyIdInput">Enter PolyID</label>
+            <input id="polyIdInput" type="text" placeholder="Example: 1234" />
+            <button id="loadPolygonBtn">Load Polygon</button>
+            <div id="polygonWarning" class="warning"></div>
+          </div>
+
+          <div id="polygonInfo">
+            <div class="info-row">
+              <div class="info-label">Vegetation Map Unit Name</div>
+              <div class="info-value muted">Enter a PolyID to load information.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOX 2: Replacement scenario -->
+      <div class="card tan">
+        <div class="card-header">Replacement Scenario</div>
+        <div class="card-body">
+          <div id="scenarioRows"></div>
+          <div class="hint">Percentages should total 100%. Leave unused rows blank or set them to 0%.</div>
+          <div id="percentWarning" class="warning"></div>
+          <button id="calculateBtn">Calculate Savings</button>
+        </div>
+      </div>
+
+      <!-- BOX 3: Results -->
+      <div class="card green">
+        <div class="card-header">Estimated Water Savings</div>
+        <div class="card-body" id="resultsBox">
+          <div class="result-row">
+            <div class="result-label">Weighted Mean Replacement ET</div>
+            <div class="result-value muted">Select a polygon and replacement scenario.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Estimates are based on modeled ET values and polygon-level summaries. Results should be interpreted as planning-level approximations rather than site-level measurements.
+    </p>
+  </main>
+
+  <script>
+    /************************************************************
+     * CSV SETUP
+     * Replace these with your GitHub raw CSV URLs.
+     * GitHub page URL will not work directly. Use the RAW csv URL.
+     ************************************************************/
+
+    const POLYGON_CSV_URL = "data/polygon_data.csv";
+    const REPLACEMENT_CSV_URL = "data/replacement_communities.csv";
+
+    /************************************************************
+     * Expected polygon_data.csv fields:
+     * PolyID
+     * Vegetation Map Unit Name
+     * Area_Acres
+     * Percent_Tree
+     * Percent_Shrub
+     * Percent_Herbaceous
+     * ET_mm
+     * ConsumptiveUse_AF
+     *
+     * Expected replacement_communities.csv fields:
+     * Vegetation Map Unit Name
+     * Mean_ET_mm
+     ************************************************************/
+
+    let polygonData = [];
+    let replacementCommunities = [];
+    let selectedPolygon = null;
+
+    const polyIdInput = document.getElementById("polyIdInput");
+    const loadPolygonBtn = document.getElementById("loadPolygonBtn");
+    const calculateBtn = document.getElementById("calculateBtn");
+    const polygonInfo = document.getElementById("polygonInfo");
+    const polygonWarning = document.getElementById("polygonWarning");
+    const percentWarning = document.getElementById("percentWarning");
+    const scenarioRows = document.getElementById("scenarioRows");
+    const resultsBox = document.getElementById("resultsBox");
+
+    function parseNumber(value) {
+      if (value === null || value === undefined || value === "") return 0;
+      return Number(String(value).replace(/,/g, ""));
+    }
+
+    function formatNumber(value, decimals = 1) {
+      if (!Number.isFinite(value)) return "--";
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function showWarning(element, message) {
+      element.textContent = message;
+      element.style.display = "block";
+    }
+
+    function hideWarning(element) {
+      element.textContent = "";
+      element.style.display = "none";
+    }
+
+    function loadCsv(url) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(url, {
+          download: true,
+          header: true,
+          skipEmptyLines: true,
+          complete: results => resolve(results.data),
+          error: error => reject(error)
+        });
+      });
+    }
+
+    async function initializeApp() {
+      try {
+        const [polygonRows, replacementRows] = await Promise.all([
+          loadCsv(POLYGON_CSV_URL),
+          loadCsv(REPLACEMENT_CSV_URL)
+        ]);
+
+        polygonData = polygonRows;
+        replacementCommunities = replacementRows
+          .filter(row => row["Vegetation Map Unit Name"])
+          .sort((a, b) => a["Vegetation Map Unit Name"].localeCompare(b["Vegetation Map Unit Name"]));
+
+        buildScenarioRows();
+      } catch (error) {
+        showWarning(polygonWarning, "CSV files could not be loaded. Check your CSV file paths or GitHub raw URLs.");
+        console.error(error);
+      }
+    }
+
+    function buildScenarioRows() {
+      scenarioRows.innerHTML = "";
+
+      for (let i = 1; i <= 3; i++) {
+        const row = document.createElement("div");
+        row.className = "scenario-row";
+
+        const communityOptions = ["<option value=''>Select community</option>"]
+          .concat(
+            replacementCommunities.map(community => {
+              const name = community["Vegetation Map Unit Name"];
+              return `<option value="${name}">${name}</option>`;
+            })
+          )
+          .join("");
+
+        row.innerHTML = `
+          <div>
+            <label for="community${i}">Community ${i}</label>
+            <select id="community${i}" class="community-select">
+              ${communityOptions}
+            </select>
+          </div>
+          <div>
+            <label for="percent${i}">Percent</label>
+            <input id="percent${i}" class="percent-input" type="number" min="0" max="100" step="1" placeholder="0" />
+          </div>
+        `;
+
+        scenarioRows.appendChild(row);
+      }
+    }
+
+    function loadPolygon() {
+      hideWarning(polygonWarning);
+      hideWarning(percentWarning);
+
+      const polyId = polyIdInput.value.trim();
+      if (!polyId) {
+        showWarning(polygonWarning, "Please enter a PolyID.");
+        return;
+      }
+
+      selectedPolygon = polygonData.find(row => String(row.PolyID).trim() === polyId);
+
+      if (!selectedPolygon) {
+        selectedPolygon = null;
+        showWarning(polygonWarning, `No polygon found for PolyID ${polyId}.`);
+        polygonInfo.innerHTML = `
+          <div class="info-row">
+            <div class="info-label">Vegetation Map Unit Name</div>
+            <div class="info-value muted">No polygon loaded.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const area = parseNumber(selectedPolygon.Area_Acres);
+      const tree = parseNumber(selectedPolygon.Percent_Tree);
+      const shrub = parseNumber(selectedPolygon.Percent_Shrub);
+      const herb = parseNumber(selectedPolygon.Percent_Herbaceous);
+      const etMm = parseNumber(selectedPolygon.ET_mm);
+      const consumptiveUse = parseNumber(selectedPolygon.ConsumptiveUse_AF);
+
+      polygonInfo.innerHTML = `
+        <div class="info-row">
+          <div class="info-label">PolyID</div>
+          <div class="info-value">${selectedPolygon.PolyID}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Vegetation Map Unit Name</div>
+          <div class="info-value">${selectedPolygon["Vegetation Map Unit Name"] || "--"}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Polygon Area</div>
+          <div class="info-value">${formatNumber(area, 2)} acres</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Percent Cover</div>
+          <div class="info-value">
+            Tree: ${formatNumber(tree, 0)}%<br />
+            Shrub: ${formatNumber(shrub, 0)}%<br />
+            Herbaceous: ${formatNumber(herb, 0)}%
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Current ET</div>
+          <div class="info-value">${formatNumber(etMm, 1)} mm</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Current Consumptive Water Use</div>
+          <div class="info-value">${formatNumber(consumptiveUse, 2)} acre-feet</div>
+        </div>
+      `;
+
+      renderDefaultResults();
+    }
+
+    function getScenarioInputs() {
+      const scenarios = [];
+
+      for (let i = 1; i <= 3; i++) {
+        const communityName = document.getElementById(`community${i}`).value;
+        const percent = parseNumber(document.getElementById(`percent${i}`).value);
+
+        if (communityName && percent > 0) {
+          const community = replacementCommunities.find(row => row["Vegetation Map Unit Name"] === communityName);
+          scenarios.push({
+            communityName,
+            percent,
+            meanEtMm: parseNumber(community.Mean_ET_mm)
+          });
+        }
+      }
+
+      return scenarios;
+    }
+
+    function calculateSavings() {
+      hideWarning(percentWarning);
+
+      if (!selectedPolygon) {
+        showWarning(percentWarning, "Load a polygon before calculating savings.");
+        return;
+      }
+
+      const scenarios = getScenarioInputs();
+      if (scenarios.length === 0) {
+        showWarning(percentWarning, "Select at least one replacement community and enter a percentage.");
+        return;
+      }
+
+      const totalPercent = scenarios.reduce((sum, scenario) => sum + scenario.percent, 0);
+      if (Math.abs(totalPercent - 100) > 0.01) {
+        showWarning(percentWarning, `Replacement percentages currently total ${formatNumber(totalPercent, 1)}%. They must total 100%.`);
+        return;
+      }
+
+      const areaAcres = parseNumber(selectedPolygon.Area_Acres);
+      const currentEtMm = parseNumber(selectedPolygon.ET_mm);
+      const currentUseAf = parseNumber(selectedPolygon.ConsumptiveUse_AF);
+
+      const weightedReplacementEtMm = scenarios.reduce((sum, scenario) => {
+        return sum + scenario.meanEtMm * (scenario.percent / 100);
+      }, 0);
+
+      // Convert ET depth in mm over acres to acre-feet.
+      // 1 acre-foot over 1 acre = 304.8 mm.
+      const replacementUseAf = (weightedReplacementEtMm / 304.8) * areaAcres;
+      const deltaEtMm = currentEtMm - weightedReplacementEtMm;
+      const deltaUseAf = currentUseAf - replacementUseAf;
+      const percentChange = currentUseAf !== 0 ? (deltaUseAf / currentUseAf) * 100 : 0;
+
+      resultsBox.innerHTML = `
+        <div class="result-row">
+          <div class="result-label">Weighted Mean Replacement ET</div>
+          <div class="result-value">${formatNumber(weightedReplacementEtMm, 1)} mm</div>
+        </div>
+        <div class="result-row">
+          <div class="result-label">Projected Replacement Water Use</div>
+          <div class="result-value">${formatNumber(replacementUseAf, 2)} acre-feet</div>
+        </div>
+        <div class="success-box">
+          <div>ΔET</div>
+          <div class="large-number">${formatNumber(deltaEtMm, 1)} mm</div>
+          <br />
+          <div>Δ Water Use</div>
+          <div class="large-number">${formatNumber(deltaUseAf, 2)} acre-feet</div>
+          <div style="margin-top: 8px;">${formatNumber(percentChange, 1)}% change in consumptive use</div>
+        </div>
+      `;
+    }
+
+    function renderDefaultResults() {
+      resultsBox.innerHTML = `
+        <div class="result-row">
+          <div class="result-label">Weighted Mean Replacement ET</div>
+          <div class="result-value muted">Select replacement communities and click Calculate Savings.</div>
+        </div>
+      `;
+    }
+
+    loadPolygonBtn.addEventListener("click", loadPolygon);
+    calculateBtn.addEventListener("click", calculateSavings);
+
+    polyIdInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") loadPolygon();
+    });
+
+    initializeApp();
+  </script>
+</body>
+</html>
