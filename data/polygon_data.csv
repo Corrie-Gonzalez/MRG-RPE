@@ -1,4 +1,4 @@
-PolyID,Vegetation Map Unit Name,Area_Acres,Percent_Herbaceous,Percent_Shrub,Percent_Tree,ET_mm,ConsumptiveUse_AF
+PolyID,Vegetation Map Unit Name,Area_Acres,Percent_Herbaceous,Percent_Shrub,Percent_Tree,Mean_ET_mm,ConsumptiveUse_AF
 8162,Mixed Russian Olive-Tamarisk Woodland and Scrub,0.37,22.76,45.05,32.19,413.92,0.5
 8150,Mixed Russian Olive-Tamarisk Woodland and Scrub,0.85,12.86,38.62,48.52,532.27,1.48
 8015,Mixed Russian Olive-Tamarisk Woodland and Scrub,2.16,65.93,27.15,6.92,585.19,4.15
