@@ -456,7 +456,7 @@
       const tree = parseNumber(selectedPolygon.Percent_Tree);
       const shrub = parseNumber(selectedPolygon.Percent_Shrub);
       const herb = parseNumber(selectedPolygon.Percent_Herbaceous);
-      const etMm = parseNumber(selectedPolygon.ET_mm);
+      const etMm = parseNumber(selectedPolygon.Mean_ET_mm);
       const consumptiveUse = parseNumber(selectedPolygon.ConsumptiveUse_AF);
 
       polygonInfo.innerHTML = `
@@ -552,7 +552,7 @@ function calculateSavings() {
   hideWarning(percentWarning);
 
   if (!selectedPolygon) {
-    showWarning(percentWarning, "Load a polygon before calculating savings.");
+    showWarning(percentWarning, "Load a polygon before calculating savings."); 
     return;
   }
 
@@ -571,7 +571,7 @@ function calculateSavings() {
   }
 
   const areaAcres = parseNumber(selectedPolygon.Area_Acres);
-  const currentEtMm = parseNumber(selectedPolygon.ET_mm);
+  const currentEtMm = parseNumber(selectedPolygon.Mean_ET_mm);
   const currentUseAf = parseNumber(selectedPolygon.ConsumptiveUse_AF);
 
   const weightedReplacementEtMm = scenarios.reduce((sum, scenario) => {
