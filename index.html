@@ -28,16 +28,10 @@
       padding: 10px;
     }
 
-    .calculator-layout {
-  display: flex;
+.calculator-layout {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 10px;
-  overflow-x: auto;   /* 👈 KEY LINE */
-  padding-bottom: 6px;
-}
-
-.card {
-  min-width: 320px;   /* 👈 forces side-by-side */
-  flex-shrink: 0;
 }
 
     header {
@@ -242,6 +236,99 @@
         min-height: auto;
       }
     }
+
+
+    /* COMPACT EXPERIENCE BUILDER POPUP MODE */
+body {
+  font-size: 11px;
+  overflow: hidden;
+}
+
+.app {
+  padding: 4px;
+}
+
+header {
+  display: none;
+}
+
+.calculator-layout {
+  display: grid;
+  grid-template-columns: 250px 305px 250px;
+  gap: 6px;
+  align-items: start;
+}
+
+.card {
+  min-height: 390px;
+  max-height: 390px;
+  border-radius: 8px;
+  border-width: 1px;
+  overflow-y: auto;
+}
+
+.card-header {
+  padding: 7px 9px;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 8px;
+}
+
+.field-group {
+  margin-bottom: 8px;
+}
+
+label {
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+input,
+select {
+  padding: 6px 7px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+button {
+  padding: 7px 8px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.info-row,
+.result-row {
+  padding: 6px 0;
+}
+
+.info-value,
+.result-value {
+  font-size: 12px;
+}
+
+.scenario-row {
+  grid-template-columns: 1fr 75px;
+  gap: 6px;
+  padding: 7px 0;
+}
+
+.hint,
+.footer-note {
+  display: none;
+}
+
+.success-box,
+.loss-box {
+  margin-top: 8px;
+  padding: 9px;
+  border-radius: 8px;
+}
+
+.large-number {
+  font-size: 1rem;
+}
   </style>
 </head>
 
