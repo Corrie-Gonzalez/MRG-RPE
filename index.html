@@ -18,12 +18,14 @@
       font-family: Arial, Helvetica, sans-serif;
       background: #f3f4f1;
       color: #243026;
+      font-size: 14px;
     }
 
     .app {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 24px;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 10px;
     }
 
     header {
@@ -44,8 +46,8 @@
 
     .calculator-layout {
       display: grid;
-      grid-template-columns: 1fr 1.45fr 1fr;
-      gap: 18px;
+      grid-template-columns: 0.9fr 1.3fr 0.9fr;
+      gap: 10px;
       align-items: stretch;
     }
 
@@ -55,7 +57,7 @@
       border-radius: 14px;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
       overflow: hidden;
-      min-height: 500px;
+      min-height: auto;
     }
 
     .card-header {
@@ -81,7 +83,7 @@
     }
 
     .card-body {
-      padding: 18px;
+      padding: 12px;
     }
 
     label {
@@ -203,7 +205,7 @@
 }
 
     .large-number {
-      font-size: 1.45rem;
+      font-size: 1.15rem;
       font-weight: 800;
       color: #244d2c;
     }
