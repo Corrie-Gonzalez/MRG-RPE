@@ -28,6 +28,18 @@
       padding: 10px;
     }
 
+    .calculator-layout {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;   /* 👈 KEY LINE */
+  padding-bottom: 6px;
+}
+
+.card {
+  min-width: 320px;   /* 👈 forces side-by-side */
+  flex-shrink: 0;
+}
+
     header {
       margin-bottom: 18px;
     }
